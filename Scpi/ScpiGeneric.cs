@@ -36,10 +36,9 @@ public abstract class ScpiGeneric : IScpi
         Request($"I{channel} {value}");
     }
 
-    public string Identification()
-    {
-        return RequestResponse("IDN?");
-    }
+    public bool IsConnected => IsConnectedGetter();
+
+    protected abstract bool IsConnectedGetter();
 
     protected abstract string RequestResponse(string request);
     protected abstract void Request(string request);

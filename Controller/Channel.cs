@@ -14,19 +14,31 @@ public class Channel : IChannel
     public decimal Voltage
     {
         get => _voltage;
-        set => _queue.Enqueue(() => _scpi.SetVoltage(Id, (double) value));
+        set
+        {
+            if (_scpi.IsConnected)
+                _queue.Enqueue(() => _scpi.SetVoltage(Id, (double) value));
+        }
     }
 
     public decimal Current
     {
         get => _current;
-        set => _queue.Enqueue(() => _scpi.SetCurrent(Id, (double) value));
+        set
+        {
+            if (_scpi.IsConnected)
+                _queue.Enqueue(() => _scpi.SetCurrent(Id, (double) value));
+        }
     }
 
     public bool OutputEnable
     {
         get => _output;
-        set => _queue.Enqueue(() => _scpi.SetOutput(Id, value));
+        set
+        {
+            if (_scpi.IsConnected)
+                _queue.Enqueue(() => _scpi.SetOutput(Id, value));
+        }
     }
 
     internal Channel(int id, ref IScpi scpi)

@@ -10,5 +10,5 @@ public interface IScpi
     public void SetOutput(int channel,bool value);
     public decimal GetCurrent(int channel);
     public void SetCurrent(int channel,double value);
-    public string Identification();
+    public bool IsConnected { get; }
 }

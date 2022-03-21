@@ -7,6 +7,13 @@ public class ScpiSerial : ScpiGeneric, IDisposable
 {
     private SerialPort? _serialPort;
 
+    public void Dispose()
+    {
+        _serialPort?.Dispose();
+    }
+
+    protected override bool IsConnectedGetter() => _serialPort is not null && _serialPort.IsOpen;
+
     public override bool Connect(string name)
     {
         var portNames = SerialPort.GetPortNames();
@@ -42,15 +49,18 @@ public class ScpiSerial : ScpiGeneric, IDisposable
 
     private bool CheckPort(string port, string name)
     {
-        var serialPort = InitSerialPort(port);
+        SerialPort serialPort;
+        try
+        {
+            serialPort = InitSerialPort(port);
+        }
+        catch(Exception)
+        {
+            return false;
+        }
         var response = RequestResponse(serialPort, "*IDN?");
         serialPort.Close();
         return response.Contains(name);
-    }
-
-    public void Dispose()
-    {
-        _serialPort?.Dispose();
     }
 
     protected override string RequestResponse(string request)
