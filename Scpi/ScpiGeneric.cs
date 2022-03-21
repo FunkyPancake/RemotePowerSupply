@@ -2,15 +2,9 @@ namespace Scpi;
 
 public abstract class ScpiGeneric : IScpi
 {
-    public bool Connect(string name)
-    {
-        throw new NotImplementedException();
-    }
+    public abstract bool Connect(string name);
 
-    public void Disconnect()
-    {
-        throw new NotImplementedException();
-    }
+    public abstract void Disconnect();
 
     public decimal GetVoltage(int channel)
     {

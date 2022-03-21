@@ -7,7 +7,7 @@ public class ScpiSerial : ScpiGeneric, IDisposable
 {
     private SerialPort? _serialPort;
 
-    public new bool Connect(string name)
+    public override bool Connect(string name)
     {
         var portNames = SerialPort.GetPortNames();
         foreach (var port in portNames)
@@ -35,7 +35,7 @@ public class ScpiSerial : ScpiGeneric, IDisposable
         return serialPort;
     }
 
-    public new void Disconnect()
+    public override void Disconnect()
     {
         _serialPort?.Close();
     }
