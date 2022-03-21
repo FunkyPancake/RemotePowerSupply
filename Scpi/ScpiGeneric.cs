@@ -48,5 +48,5 @@ public abstract class ScpiGeneric : IScpi
     }
 
     protected abstract string RequestResponse(string request);
-    protected abstract string Request(string request);
+    protected abstract void Request(string request);
 }

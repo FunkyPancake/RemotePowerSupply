@@ -10,7 +10,7 @@ public class PowerSupplySerial : IPowerSupply
 
     public PowerSupplySerial(string name, int channelCount)
     {
-        _scpi = new MockScpi();
+        _scpi = new ScpiSerial();
         var channels = new List<IChannel>();
         _refreshList = new List<Action>();
         for (var i = 0; i < channelCount; i++)
