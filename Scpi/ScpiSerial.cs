@@ -1,11 +1,20 @@
 using System.IO.Ports;
 using System.Text;
+using Serilog;
 
 namespace Scpi;
 
 public class ScpiSerial : ScpiGeneric, IDisposable
 {
     private SerialPort? _serialPort;
+    private readonly ILogger _logger;
+    private string _comPort;
+
+    public ScpiSerial(ILogger logger, ref string comPort)
+    {
+        _logger = logger;
+        _comPort = comPort;
+    }
 
     public void Dispose()
     {
@@ -16,15 +25,30 @@ public class ScpiSerial : ScpiGeneric, IDisposable
 
     public override bool Connect(string name)
     {
+        _logger.Information("Try to connect.");
         var portNames = SerialPort.GetPortNames();
+        if (portNames.Contains(_comPort))
+        {
+            _logger.Debug("Try to connect to the last used comPort {port}.", _comPort);
+            if (CheckPort(_comPort, name))
+            {
+                _serialPort = InitSerialPort(_comPort);
+                _logger.Information("Connection successful.");
+                return true;
+            }
+        }
+
         foreach (var port in portNames)
         {
             if (!CheckPort(port, name))
                 continue;
             _serialPort = InitSerialPort(port);
+            _logger.Information("Connection successful on port {port}.", port);
             return true;
         }
 
+        _logger.Information("Connection failed.");
+        _comPort = "";
         return false;
     }
 
@@ -54,12 +78,15 @@ public class ScpiSerial : ScpiGeneric, IDisposable
         {
             serialPort = InitSerialPort(port);
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            _logger.Error("{exception}", e);
             return false;
         }
 
         var response = RequestResponse(serialPort, "*IDN?");
+        _logger.Debug("Response for *IDN? {response}.", response);
+
         serialPort.Close();
         return response.Contains(name);
     }
@@ -89,12 +116,13 @@ public class ScpiSerial : ScpiGeneric, IDisposable
         {
             if (!serial.IsOpen)
                 return string.Empty;
-            var response = serial.ReadLine();
+            var response = serial.ReadLine().Trim();
             serial.ReadExisting();
-            return response.Trim();
+            return response;
         }
         catch (TimeoutException)
         {
+            _logger.Error("Request: {request} - Timeout", request);
             return string.Empty;
         }
     }
