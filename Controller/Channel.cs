@@ -12,7 +12,7 @@ public class Channel : IChannel
     private bool _output;
     private double _voltage;
 
-    internal Channel(ILogger logger, int id, ref IScpi scpi)
+    internal Channel(ILogger logger, int id, IScpi scpi)
     {
         Id = id;
         _logger = logger;
