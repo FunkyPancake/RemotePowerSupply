@@ -6,28 +6,35 @@ public class Channel : IChannel
 {
     private readonly UniqueQueue<Action> _queue = new();
     private readonly IScpi _scpi;
-    private decimal _voltage;
-    private decimal _current;
+    private double _current;
     private bool _output;
+    private double _voltage;
+
+    internal Channel(int id, ref IScpi scpi)
+    {
+        Id = id;
+        _scpi = scpi;
+    }
+
     public int Id { get; }
 
-    public decimal Voltage
+    public double Voltage
     {
         get => _voltage;
         set
         {
             if (_scpi.IsConnected)
-                _queue.Enqueue(() => _scpi.SetVoltage(Id, (double) value));
+                _queue.Enqueue(() => _scpi.SetVoltage(Id, value));
         }
     }
 
-    public decimal Current
+    public double Current
     {
         get => _current;
         set
         {
             if (_scpi.IsConnected)
-                _queue.Enqueue(() => _scpi.SetCurrent(Id, (double) value));
+                _queue.Enqueue(() => _scpi.SetCurrent(Id, value));
         }
     }
 
@@ -41,10 +48,12 @@ public class Channel : IChannel
         }
     }
 
-    internal Channel(int id, ref IScpi scpi)
+    public (double, double) GetSetpoints()
     {
-        Id = id;
-        _scpi = scpi;
+        _output = _scpi.GetOutput(Id);
+        var voltage = _scpi.GetVoltageSetpoint(Id);
+        var current = _scpi.GetCurrentSetpoint(Id);
+        return (voltage, current);
     }
 
     internal void RefreshChannel()

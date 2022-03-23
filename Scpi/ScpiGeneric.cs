@@ -6,9 +6,10 @@ public abstract class ScpiGeneric : IScpi
 
     public abstract void Disconnect();
 
-    public decimal GetVoltage(int channel)
+    public double GetVoltage(int channel)
     {
-        return (decimal) double.Parse(RequestResponse($"V{channel}O?").Trim('V'));
+        double.TryParse(RequestResponse($"V{channel}O?").Trim('V'), out var value);
+        return value;
     }
 
     public void SetVoltage(int channel, double value)
@@ -26,14 +27,27 @@ public abstract class ScpiGeneric : IScpi
         Request($"OP{channel} {(value ? 1 : 0)}");
     }
 
-    public decimal GetCurrent(int channel)
+    public double GetCurrent(int channel)
     {
-        return (decimal) double.Parse(RequestResponse($"I{channel}O?").Trim('A'));
+        double.TryParse(RequestResponse($"I{channel}O?").Trim('A'), out var value);
+        return value;
     }
 
     public void SetCurrent(int channel, double value)
     {
         Request($"I{channel} {value}");
+    }
+
+    public double GetCurrentSetpoint(int channel)
+    {
+        double.TryParse(RequestResponse($"I{channel}?").Split(' ')[1].Trim('A'), out var value);
+        return value;
+    }
+
+    public double GetVoltageSetpoint(int channel)
+    {
+        double.TryParse(RequestResponse($"V{channel}?").Split(' ')[1].Trim('V'), out var value);
+        return value;
     }
 
     public bool IsConnected => IsConnectedGetter();

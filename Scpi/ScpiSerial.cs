@@ -19,7 +19,7 @@ public class ScpiSerial : ScpiGeneric, IDisposable
         var portNames = SerialPort.GetPortNames();
         foreach (var port in portNames)
         {
-            if (!CheckPort(port,name))
+            if (!CheckPort(port, name))
                 continue;
             _serialPort = InitSerialPort(port);
             return true;
@@ -54,10 +54,11 @@ public class ScpiSerial : ScpiGeneric, IDisposable
         {
             serialPort = InitSerialPort(port);
         }
-        catch(Exception)
+        catch (Exception)
         {
             return false;
         }
+
         var response = RequestResponse(serialPort, "*IDN?");
         serialPort.Close();
         return response.Contains(name);
@@ -75,6 +76,8 @@ public class ScpiSerial : ScpiGeneric, IDisposable
 
     private void Request(SerialPort serial, string request)
     {
+        if (!serial.IsOpen)
+            return;
         var requestBytes = Encoding.ASCII.GetBytes(request + "\n");
         serial.Write(requestBytes, 0, requestBytes.Length);
     }
@@ -84,9 +87,11 @@ public class ScpiSerial : ScpiGeneric, IDisposable
         Request(serial, request);
         try
         {
+            if (!serial.IsOpen)
+                return string.Empty;
             var response = serial.ReadLine();
             serial.ReadExisting();
-            return response;
+            return response.Trim();
         }
         catch (TimeoutException)
         {
