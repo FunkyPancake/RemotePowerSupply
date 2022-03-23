@@ -40,13 +40,13 @@ public abstract class ScpiGeneric : IScpi
 
     public double GetCurrentSetpoint(int channel)
     {
-        double.TryParse(RequestResponse($"I{channel}?").Trim('A'), out var value);
+        double.TryParse(RequestResponse($"I{channel}?").Split(' ')[1].Trim('A'), out var value);
         return value;
     }
 
     public double GetVoltageSetpoint(int channel)
     {
-        double.TryParse(RequestResponse($"V{channel}?").Trim('V'), out var value);
+        double.TryParse(RequestResponse($"V{channel}?").Split(' ')[1].Trim('V'), out var value);
         return value;
     }
 
