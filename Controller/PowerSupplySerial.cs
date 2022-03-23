@@ -4,18 +4,18 @@ namespace Controller;
 
 public class PowerSupplySerial : IPowerSupply
 {
+    private readonly List<Action> _refreshList;
     private readonly IScpi _scpi;
     private bool _isConnected;
-    private readonly List<Action> _refreshList;
 
     public PowerSupplySerial(string name, int channelCount)
     {
         _scpi = new ScpiSerial();
         var channels = new List<IChannel>();
         _refreshList = new List<Action>();
-        for (var i = 0; i < channelCount; i++)
+        for (var i = 1; i <= channelCount; i++)
         {
-            var channel = new Channel(i,ref _scpi);
+            var channel = new Channel(i, ref _scpi);
             _refreshList.Add(channel.RefreshChannel);
             channels.Add(channel);
         }
@@ -26,11 +26,6 @@ public class PowerSupplySerial : IPowerSupply
 
     public string Name { get; }
     public List<IChannel> Channels { get; }
-
-    public void Init(List<int>? channelDefaults = null)
-    {
-        throw new NotImplementedException();
-    }
 
     public bool Connect()
     {
