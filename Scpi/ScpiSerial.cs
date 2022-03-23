@@ -10,7 +10,9 @@ public class ScpiSerial : ScpiGeneric, IDisposable
     private readonly ILogger _logger;
     private string _comPort;
 
-    public ScpiSerial(ILogger logger, ref string comPort)
+    public string ComPort => _comPort;
+
+    public ScpiSerial(ILogger logger, string comPort)
     {
         _logger = logger;
         _comPort = comPort;
@@ -25,11 +27,16 @@ public class ScpiSerial : ScpiGeneric, IDisposable
 
     public override bool Connect(string name)
     {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            _logger.Error("Device name is empty.");
+            return false;
+        }
         _logger.Information("Try to connect.");
         var portNames = SerialPort.GetPortNames();
         if (portNames.Contains(_comPort))
         {
-            _logger.Debug("Try to connect to the last used comPort {port}.", _comPort);
+            _logger.Debug("Try to connect to the last used port: {port}.", _comPort);
             if (CheckPort(_comPort, name))
             {
                 _serialPort = InitSerialPort(_comPort);
@@ -43,6 +50,7 @@ public class ScpiSerial : ScpiGeneric, IDisposable
             if (!CheckPort(port, name))
                 continue;
             _serialPort = InitSerialPort(port);
+            _comPort = port;
             _logger.Information("Connection successful on port {port}.", port);
             return true;
         }

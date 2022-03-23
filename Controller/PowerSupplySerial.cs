@@ -6,21 +6,19 @@ namespace Controller;
 public class PowerSupplySerial : IPowerSupply
 {
     private readonly List<Action> _refreshList;
-    private readonly IScpi _scpi;
+    private readonly ScpiSerial _scpi;
     private bool _isConnected;
-    private readonly string _comPort;
 
-    public string ComPort => _comPort;
+    public string ComPort => _scpi.ComPort;
 
-    public PowerSupplySerial(ILogger logger,string name, int channelCount, string comPort = "")
+    public PowerSupplySerial(ILogger logger, string name, int channelCount, string comPort = "")
     {
-        _comPort = comPort;
-        _scpi = new ScpiSerial(logger,ref _comPort);
+        _scpi = new ScpiSerial(logger, comPort);
         var channels = new List<IChannel>();
         _refreshList = new List<Action>();
         for (var i = 1; i <= channelCount; i++)
         {
-            var channel = new Channel(logger, i, ref _scpi);
+            var channel = new Channel(logger, i, _scpi);
             _refreshList.Add(channel.RefreshChannel);
             channels.Add(channel);
         }
